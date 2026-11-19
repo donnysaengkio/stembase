@@ -1,0 +1,78 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Stembase",
+  "version": "2.0.0",
+  "identifier": "app.stembase.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Stembase",
+        "width": 1280,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 600,
+        "backgroundColor": "#0f0f11",
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ipc: http://ipc.localhost http://127.0.0.1:*; media-src 'self' blob: http://127.0.0.1:*; img-src 'self' data: http://127.0.0.1:*; style-src 'self' 'unsafe-inline'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "dmg",
+      "app",
+      "appimage",
+      "deb"
+    ],
+    "category": "Music",
+    "shortDescription": "Analyze music, split stems, make MIDI, mashups and key/tempo changes",
+    "longDescription": "Stembase analyzes music (key, tempo, loudness, chords), splits songs into stems, turns audio into MIDI, makes mashups, changes key or tempo and converts audio files. Everything runs on your computer.",
+    "copyright": "Only release stems, mashups or edits of music you have the rights to.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "../../dist/stembase-engine/": "engine/"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "11.0"
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY5NDFERkFENzU1RDU5NkEKUldScVdWMTFyZDlCYVptaEQ2RTRiOTJKRjd6Q0o1bzZpcGhLTVZIMkdmU3ZZbU5JbFcyb2s0bVcK",
+      "endpoints": [
+        "https://github.com/donnysaengkio/stembase/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

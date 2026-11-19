@@ -1,0 +1,92 @@
+VERCEL HOSTING COST ESTIMATE - Stem Studio (Next.js version)
+=============================================================
+
+Summary: about $0-20 a month for personal use and about $45-70 a month at 1,000 jobs,
+after a $20/month Vercel Pro plan. Most of the cost is the GPU that separates the stems
+and the bandwidth for downloading them. Vercel can only host part of it.
+
+
+WHAT VERCEL CAN AND CAN'T RUN
+-----------------------------
+Vercel's functions top out at 4 GB of memory, 2 CPUs and about 13 minutes per request.
+They have no GPU, and requests are limited to 4.5 MB, which is less than one song.
+Demucs with PyTorch also needs more code than a standard function allows.
+So the realistic setup is:
+
+  Part                          Runs on        What it does
+  ----------------------------  -------------  --------------------------------------------------
+  Next.js interface and API     Vercel         Pages, job tracking, download links
+  Audio uploads and results     Vercel Blob    Your browser uploads directly to storage,
+                                               which gets around the 4.5 MB limit
+  Python audio engine           Modal (a GPU   Stems, mashups, analysis, key/tempo changes,
+                                service that   conversion
+                                bills per
+                                second)
+
+Running the engine on Vercel's CPUs is technically possible but not worth it. It would cost
+about the same per job and take several minutes per song. The best-quality model could run
+out of time, and the code would need Vercel's beta large-bundle option.
+
+
+COST PER JOB
+------------
+Assumes a 4-minute song, a T4 GPU on Modal at about $0.59/hour, and 30-60 seconds of billed
+time per separation including start-up.
+
+  Job                                                      Approx. cost
+  -------------------------------------------------------  ------------
+  Separate stems (Balanced)                                ~$0.01
+  Separate stems (Best quality, 4x slower)                 ~$0.03-0.04
+  Mashup (two separations plus the mix)                    ~$0.02-0.03
+  Analyze / change key or tempo / convert (CPU only)       under $0.002
+  Storage and downloads (~150-250 MB of stems at $0.05/GB) ~$0.01
+
+The alternative to Modal is Replicate's ready-made Demucs, at about $0.015-0.02 per run.
+It needs less setup, but the other features would still need a server.
+
+
+MONTHLY ESTIMATE
+----------------
+  Usage                      Vercel              GPU / compute         Storage & transfer  TOTAL
+  -------------------------  ------------------  --------------------  ------------------  ----------
+  Just you (~50 jobs)        $0 Hobby / $20 Pro  ~$1 (likely covered   ~$1                 ~$0-20
+                                                 by Modal's free
+                                                 credit)
+  Small public site (1,000)  $20                 ~$15-30               ~$10-20             ~$45-70
+  Busy site (10,000)         $20+                ~$150-300             ~$100-150           ~$300-500
+
+
+THINGS THAT CHANGE THE PICTURE
+------------------------------
+- Deleting files after 24 hours keeps storage near zero. Keeping stems a month adds about
+  $0.006 per job.
+- Public use needs sign-in and a usage limit, or anyone could spend your GPU budget.
+  Vercel's free Hobby plan is also for non-commercial use only.
+- Copyright: a public site that splits commercial songs into stems invites takedown
+  requests. That risk disappears if it stays private or you're the only user.
+- Privacy: your audio would be uploaded to Vercel and Modal, while the current app never
+  leaves your PC.
+- Prices are approximate. They come mostly from third-party summaries from 2026 and vary
+  by region. Vercel also changed how it bills CDN bandwidth in September 2026. Check the
+  official pricing pages before committing.
+
+If only you will use it, the local Next.js app has none of these costs and keeps
+everything offline. Hosting on Vercel only pays off if other people will use it.
+
+
+SOURCES
+-------
+Vercel Functions limits:            https://vercel.com/docs/functions/limitations
+Vercel pricing:                     https://vercel.com/docs/pricing
+Vercel Blob usage and pricing:      https://vercel.com/docs/vercel-blob/usage-and-pricing
+Vercel regional pricing:            https://vercel.com/docs/pricing/regional-pricing
+Bypassing Vercel's body size limit: https://vercel.com/kb/guide/how-to-bypass-vercel-body-size-limit-serverless-functions
+Vercel's 250 MB function limit:     https://vercel.com/kb/guide/troubleshooting-function-250mb-limit
+Vercel cost in 2026 (MakerKit):     https://makerkit.dev/blog/saas/vercel-cost
+Vercel pricing 2026 (temps.sh):     https://temps.sh/blog/vercel-pricing-complete-guide-2026
+Vercel flat-rate CDN launch:        https://www.usagepricing.com/blueprint/activity/vercel-2026-09-11-flat-rate-cdn-launch
+Modal GPU pricing 2026 (Spheron):   https://www.spheron.network/blog/modal-gpu-pricing-2026-per-second-billing/
+Modal per-second billing explained: https://computeprices.com/blog/modal-gpu-pricing-per-second-billing-explained
+Modal pricing explained (Beam):     https://www.beam.cloud/blog/modal-pricing-explained
+Replicate: cjwbw/demucs:            https://replicate.com/cjwbw/demucs
+Replicate: jagilley/demucs:         https://replicate.com/jagilley/demucs

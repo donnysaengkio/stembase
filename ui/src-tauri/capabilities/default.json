@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "What the Stembase window may do: open-file dialogs, its own updates, restart after an update, and open web links.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "updater:default",
+    "process:allow-restart",
+    "opener:allow-open-url"
+  ]
+}

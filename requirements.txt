@@ -1,0 +1,17 @@
+numpy
+scipy
+librosa
+soundfile
+torch
+demucs
+pedalboard
+pyloudnorm
+fastapi
+uvicorn
+onnxruntime
+pretty_midi
+resampy==0.4.3
+mir_eval
+scikit-learn
+pillow
+# basic-pitch: install with  pip install --no-deps basic-pitch==0.4.0  (its metadata asks for TensorFlow, which is not needed)

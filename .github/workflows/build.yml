@@ -1,0 +1,89 @@
+# Builds the Stembase installers for Windows, macOS and Linux on GitHub's machines (each system builds its own) and
+# publishes them as a GitHub release, with latest.json for the app's Check For Updates.
+# Run it from the Actions tab ("Run workflow") after raising the version in ui/src-tauri/tauri.conf.json.
+#
+# One-time setup in the repository:
+# - Secret TAURI_SIGNING_PRIVATE_KEY: the contents of ~/.tauri/stembase.key (signs updates; keep it private).
+# - Secret TAURI_SIGNING_PRIVATE_KEY_PASSWORD: empty unless you gave the key a password.
+# - A release tagged "models" with models.zip: the "models" folder zipped (the Demucs models, about 450 MB).
+name: Build and release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            bundles: nsis
+          - os: macos-14          # Apple Silicon
+            bundles: app,dmg
+          - os: macos-13          # Intel
+            bundles: app,dmg
+          - os: ubuntu-22.04
+            bundles: appimage,deb
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the Demucs models
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download models --pattern models.zip --repo "$GITHUB_REPOSITORY"
+          unzip -q models.zip && rm models.zip && ls models
+
+      - name: Linux packages for the window (WebKitGTK)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libsndfile1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Python packages
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ "$RUNNER_OS" != "macOS" ]; then
+            pip install torch --index-url https://download.pytorch.org/whl/cpu   # CPU build: much smaller
+          fi
+          pip install -r requirements.txt pyinstaller
+          pip install --no-deps basic-pitch==0.4.0
+
+      - name: Build the audio engine
+        run: python -m PyInstaller stembase_engine.spec --noconfirm
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Interface packages
+        working-directory: ui
+        run: npm ci
+
+      - name: Build the app and publish the release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: ui
+          tagName: v__VERSION__
+          releaseName: Stembase __VERSION__
+          releaseBody: See the README for what's new.
+          releaseDraft: false
+          includeUpdaterJson: true
+          args: --bundles ${{ matrix.bundles }}
