@@ -1,6 +1,6 @@
 [package]
 name = "stembase"
-version = "2.0.0"
+version = "1.0.0"
 description = "Stembase: analyze music, split it into stems, make MIDI, mashups and key/tempo changes"
 edition = "2021"
 

@@ -2,7 +2,7 @@
 import os, sys, json
 
 APP_NAME = "Stembase"   # change here, in ui/src-tauri/tauri.conf.json and ui/package.json to rename the app
-APP_VERSION = "2.0.0"
+APP_VERSION = "1.0.0"
 FROZEN = getattr(sys, "frozen", False)   # True inside the packaged engine
 APP_DIR = os.path.dirname(sys.executable) if FROZEN else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES_DIR = getattr(sys, "_MEIPASS", APP_DIR)   # bundled read-only resources (icon, models)
