@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useId, useRef, useStat
 import { open } from "@tauri-apps/plugin-dialog";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import { IconFolder, IconUpload, IconX, IconMusic, IconFileMusic, IconChevronDown, IconPlayerPlayFilled, IconPlayerPauseFilled, IconRefresh, IconPlayerStop } from "@tabler/icons-react";
+import { IconFolder, IconUpload, IconX, IconMusic, IconFileMusic, IconChevronDown, IconPlayerPlayFilled, IconPlayerPauseFilled, IconRefresh } from "@tabler/icons-react";
 import { baseName, cancelJob, checkDone, peaksOf, fileUrl, FileEntry, Found, inApp, jobStatus, JobView, openLocation, sizeLabel, startJob } from "./api";
 
 /* ---------------- Markdown (engine messages) ---------------- */
@@ -509,7 +509,7 @@ export function RunRow({ label, onRun, folder, onReset, job }: {
       </button>
       {job && (
         <button className="big" disabled={!mine || cancelling} title={mine ? "Stop this job" : "Nothing is running"} onClick={job.cancel}>
-          <IconPlayerStop size={18} /> {cancelling ? "Cancelling…" : "Cancel"}
+          {cancelling ? "Cancelling…" : "Cancel"}
         </button>
       )}
       <button className="big" onClick={() => openLocation(folder)}><IconFolder size={18} /> Open Folder</button>
