@@ -9,7 +9,7 @@ internet connection is needed (the separation models are included).
 ## Install
 | System | Installer | Notes |
 |---|---|---|
-| **Windows** 10 / 11 (64-bit) | `Stembase_<version>_x64-setup.exe` | Installs for your user without an admin prompt. Uses Edge WebView2 (built into Windows 11 and current Windows 10). |
+| **Windows** 10 / 11 (64-bit) | `Stembase_<version>_x64-setup.exe` | Installs for your user without an admin prompt. Until the installer is code-signed, Windows may show *Windows protected your PC*: click **More info**, then **Run anyway**. Uses Edge WebView2 (built into Windows 11 and current Windows 10). |
 | **macOS** 11 or later | `Stembase_<version>_aarch64.dmg` (Apple Silicon) or `_x64.dmg` (Intel) | Drag Stembase to Applications. Until the app is signed with an Apple Developer ID, open it the first time with right-click → Open. |
 | **Linux** (64-bit) | `Stembase_<version>_amd64.AppImage` or `.deb` | AppImage: make it executable and run it. `.deb`: `sudo apt install ./Stembase_<version>_amd64.deb`. Needs WebKitGTK 4.1 (Ubuntu 22.04+, Debian 12+, Fedora 38+). |
 
