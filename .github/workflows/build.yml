@@ -10,6 +10,11 @@ name: Build and release
 
 on:
   workflow_dispatch:
+    inputs:
+      preview:
+        description: "Preview release (a pre-release: Check For Updates in installed copies doesn't offer it)"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -24,7 +29,7 @@ jobs:
             bundles: nsis
           - os: macos-14          # Apple Silicon
             bundles: app,dmg
-          - os: macos-13          # Intel
+          - os: macos-15-intel    # Intel
             bundles: app,dmg
           - os: ubuntu-22.04
             bundles: appimage,deb
@@ -87,5 +92,6 @@ jobs:
           releaseName: Stembase __VERSION__
           releaseBody: See the README for what's new.
           releaseDraft: false
+          prerelease: ${{ inputs.preview }}
           includeUpdaterJson: true
           args: --bundles ${{ matrix.bundles }}
