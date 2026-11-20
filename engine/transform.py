@@ -18,7 +18,7 @@ def change(path, semitones=0.0, target_bpm=0.0, fmt=DEFAULT_FORMAT, progress=lam
         stretch = target_bpm / src_bpm
     if abs(stretch - 1) < 1e-6 and abs(semitones) < 1e-6:
         raise ValueError("Nothing to change: set a key shift or a target BPM.")
-    progress(0.4, "Stretching / shifting (high quality)")
+    progress(0.4, "Stretching and shifting")
     y = time_stretch(np.ascontiguousarray(x.T), SR, stretch_factor=float(stretch),
                      pitch_shift_in_semitones=float(semitones), preserve_formants=True).T
     peak = np.abs(y).max()

@@ -10,20 +10,20 @@ FORMATS = {
     "MP3 · 320 kbps": ("mp3", "mp3", 320), "MP3 · 256 kbps": ("mp3", "mp3", 256), "MP3 · 192 kbps": ("mp3", "mp3", 192),
     "MP3 · 160 kbps": ("mp3", "mp3", 160), "MP3 · 128 kbps": ("mp3", "mp3", 128), "MP3 · 96 kbps": ("mp3", "mp3", 96),
     "MP3 · 64 kbps": ("mp3", "mp3", 64),
-    "MP3 · VBR V0 (~245 kbps)": ("mp3", "mp3", "V0"), "MP3 · VBR V2 (~190 kbps)": ("mp3", "mp3", "V2"),
-    "MP3 · VBR V5 (~130 kbps)": ("mp3", "mp3", "V5"),
+    "MP3 · VBR V0 · ~245 kbps": ("mp3", "mp3", "V0"), "MP3 · VBR V2 · ~190 kbps": ("mp3", "mp3", "V2"),
+    "MP3 · VBR V5 · ~130 kbps": ("mp3", "mp3", "V5"),
     "Opus · 192 kbps": ("opus", "opus", 192), "Opus · 128 kbps": ("opus", "opus", 128), "Opus · 96 kbps": ("opus", "opus", 96),
-    "Opus · 64 kbps": ("opus", "opus", 64), "Opus · 32 kbps (speech)": ("opus", "opus", 32),
+    "Opus · 64 kbps": ("opus", "opus", 64), "Opus · 32 kbps": ("opus", "opus", 32),
     "Ogg Vorbis · 320 kbps": ("ogg", "vorbis", 320), "Ogg Vorbis · 192 kbps": ("ogg", "vorbis", 192),
     "Ogg Vorbis · 128 kbps": ("ogg", "vorbis", 128), "Ogg Vorbis · 96 kbps": ("ogg", "vorbis", 96),
-    "FLAC · 24-bit (lossless)": ("flac", "pcm", "PCM_24"), "FLAC · 16-bit (lossless)": ("flac", "pcm", "PCM_16"),
-    "WAV · 32-bit float": ("wav", "pcm", "FLOAT"), "WAV · 24-bit": ("wav", "pcm", "PCM_24"), "WAV · 16-bit": ("wav", "pcm", "PCM_16"),
-    "AIFF · 24-bit": ("aiff", "pcm", "PCM_24"), "AIFF · 16-bit": ("aiff", "pcm", "PCM_16"),
+    "FLAC · 24-Bit": ("flac", "pcm", "PCM_24"), "FLAC · 16-Bit": ("flac", "pcm", "PCM_16"),
+    "WAV · 32-Bit Float": ("wav", "pcm", "FLOAT"), "WAV · 24-Bit": ("wav", "pcm", "PCM_24"), "WAV · 16-Bit": ("wav", "pcm", "PCM_16"),
+    "AIFF · 24-Bit": ("aiff", "pcm", "PCM_24"), "AIFF · 16-Bit": ("aiff", "pcm", "PCM_16"),
 }
-SAMPLE_RATES = {"Keep original": None, "48000 Hz": 48000, "44100 Hz (CD)": 44100, "32000 Hz": 32000,
-                "22050 Hz": 22050, "16000 Hz (speech)": 16000}
-CHANNELS = ["Keep original", "Mono (about half the size for lossless formats)"]
-TARGET_CODECS = ["MP3", "Opus (better quality at low bitrates)"]
+SAMPLE_RATES = {"Keep Original": None, "48000 Hz": 48000, "44100 Hz": 44100, "32000 Hz": 32000,
+                "22050 Hz": 22050, "16000 Hz": 16000}
+CHANNELS = ["Keep Original", "Mono"]
+TARGET_CODECS = ["MP3", "Opus"]
 MP3_CBR = [320, 256, 224, 192, 160, 128, 112, 96, 80, 64, 56, 48, 40, 32]
 OPUS_RATES = [8000, 12000, 16000, 24000, 48000]   # Opus only stores these; others are resampled up to the nearest
 LOSSY_PEAK = 10 ** (-1 / 20)   # -1 dBFS headroom before MP3 / Opus / Vorbis encoding
@@ -107,7 +107,7 @@ def convert(path, fmt_label=None, sample_rate="Keep original", channels="Keep or
         out = _unique(os.path.join(out_dir, f"{track_name(path)}{os.path.splitext(path)[1].lower()}"))
         shutil.copy2(path, out)
         i = sf.info(path)
-        return dict(source=path, output=out, format="Unchanged (already under the target)", sample_rate=i.samplerate,
+        return dict(source=path, output=out, format="Unchanged, already under the target", sample_rate=i.samplerate,
                     channels=i.channels, duration=i.duration, before_mb=size_mb(path), after_mb=size_mb(out), change=0.0,
                     lossy_to_lossless=False)
     progress(0.1, f"Reading {os.path.basename(path)}")

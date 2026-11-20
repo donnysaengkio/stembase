@@ -39,11 +39,10 @@ def load_engine():
 
 # ---------------- choices shown in the app ----------------
 STEM_ORDER = ["vocals", "drums", "bass", "other", "guitar", "piano", "instrumental"]
-MIDI_STEMS = {"Vocals": "vocals", "Bass": "bass", "Other instruments": "other", "Drums": "drums",
-              "Guitar (6-stem model)": "guitar", "Piano (6-stem model)": "piano"}
-MIDI_SOURCE = ["Just that part (a single instrument, voice or drum recording)", "A full song: separate the part out first"]
-ARRANGE = ["Place vocal sections on the instrumental's phrases (recommended)", "Keep the vocal as one continuous take"]
-CONVERT_MODES = ["Choose a format and quality", "Fit each file into a target size"]
+MIDI_STEMS = {"Vocals": "vocals", "Bass": "bass", "Other": "other", "Drums": "drums", "Guitar": "guitar", "Piano": "piano"}
+MIDI_SOURCE = ["A Track Stem", "A Full Song"]
+ARRANGE = ["Fit to the Music", "One Continuous Take"]
+CONVERT_MODES = ["Choose a Format", "Fit to a Target Size"]
 SEP_SPEED = {"htdemucs": 0.3, "htdemucs_ft": 1.2, "htdemucs_6s": 0.4}   # seconds of work per second of audio on a CPU
 
 
@@ -122,7 +121,7 @@ def run_analyze(p, progress):
         dict(label="Tempo", value=f"{g['bpm']:.2f} BPM", sub=f"half {g['bpm'] / 2:.2f} · double {g['bpm'] * 2:.2f}"),
         dict(label="Loudness", value=rows["Loudness"], sub=f"peak {rows['Peak']}"),
         dict(label="Length", value=rows["Duration"],
-             sub=" · ".join(x for x in (rows.get("Sample rate", ""), rows.get("Channels", "").lower()) if x)),
+             sub=" · ".join(x for x in (rows.get("Sample Rate", ""), rows.get("Channels", "").lower()) if x)),
     ], chords=None, chords_midi=None, folder=None)
     if want:
         segs, src = ch.from_track(path, d, p.get("remove_vocals", False), lambda f, s="": progress(share + (1 - share) * f, s))
@@ -143,7 +142,7 @@ def plan_separate(p):
     sep = E["sep"]
     label = p.get("model") or list(sep.MODELS)[0]
     t = sep_seconds(p["path"], sep.MODELS[label])
-    if t == 0: return f"Exporting the stems of **{name(p['path'])}** (already separated with this model, so this is quick)."
+    if t == 0: return f"Exporting the stems of **{name(p['path'])}** It was already separated with this model, so this is quick."
     return (f"Separating **{name(p['path'])}** with the {label.split(':')[0]} model: {about(t)} on this "
             f"{'GPU' if sep.device() != 'cpu' else 'computer'}.")
 
@@ -164,10 +163,10 @@ def run_separate(p, progress):
         done = midi.stems_to_midi(full, [s for s in wanted if s in full], folder, name(path),
                                   lambda f, d="": progress(0.85 + 0.15 * f, d))
         mids = [entry(m) for m in done.values()]
-        if done: msg += f"\n\nMIDI made from: {', '.join(sep.LABELS[s] for s in done)} (saved next to the audio stems)."
+        if done: msg += f"\n\nMIDI made from: {', '.join(sep.LABELS[s] for s in done)}, saved next to the audio stems."
         if missing: msg += f"\n\n{', '.join(missing)}: only the 6-stem model separates these, so no MIDI was made for them."
     stems = [dict(entry(files[s]), stem=s, label=sep.LABELS[s]) for s in STEM_ORDER if s in files]
-    return dict(title="Stems ready", message=msg, stems=stems, midi=mids, folder=folder)
+    return dict(title="Stems Ready", message=msg, stems=stems, midi=mids, folder=folder)
 
 
 def plan_midi(p):
@@ -181,7 +180,7 @@ def plan_midi(p):
         how = f"separating the {part.lower()} from the song first, then transcribing"
     else:
         t, how = (audio_seconds(p["path"]) or 240) * 0.05 + 25, "transcribing"
-    return f"Turning **{name(p['path'])}** into MIDI ({how}): {about(t)}."
+    return f"Turning **{name(p['path'])}** into MIDI, {how}: {about(t)}."
 
 
 def run_midi(p, progress):
@@ -191,7 +190,7 @@ def run_midi(p, progress):
                            int(p.get("min_ms", 80)), p.get("snap") or list(midi.SNAP)[0], progress)
     img = os.path.join(r["folder"], ".preview", f"{name(p['path'])} - {part.replace(' / ', ' & ')} (piano roll).png")
     r["image"].save(img)
-    return dict(title="MIDI ready", message=r["info"] + f"\n\nSaved `{r['midi']}`", midi=entry(r["midi"]),
+    return dict(title="MIDI Ready", message=r["info"] + f"\n\nSaved `{r['midi']}`", midi=entry(r["midi"]),
                 preview=entry(r["preview"]), image=entry(img), folder=r["folder"])
 
 
@@ -201,8 +200,8 @@ def plan_mashup(p):
     model = sep.MODELS[p.get("model") or list(sep.MODELS)[0]]
     t = [sep_seconds(x, model) for x in (p["vocals"], p["instrumental"])]
     total = None if None in t else sum(t) + 60
-    return (f"Making the mashup of **{name(p['vocals'])}** and **{name(p['instrumental'])}**: {about(total)} "
-            f"(separating {sum(1 for x in t if x != 0)} of the 2 songs, then matching and mixing).")
+    return (f"Making the mashup of **{name(p['vocals'])}** and **{name(p['instrumental'])}**: {about(total)}, "
+            f"separating {sum(1 for x in t if x != 0)} of the 2 songs, then matching and mixing.")
 
 
 def run_mashup(p, progress):
@@ -211,8 +210,8 @@ def run_mashup(p, progress):
     P, outs, out_dir, title = mash.make_mashup(p["vocals"], p["instrumental"], p.get("key", "Auto"), arr,
                                                float(p.get("vocal_gain", 0)), sep.MODELS[p.get("model") or list(sep.MODELS)[0]],
                                                p.get("format") or E["common"].DEFAULT_FORMAT, progress)
-    return dict(title="Mashup ready", audio=entry(outs["Mashup"]),
-                message=mash.report(P, p["vocals"], p["instrumental"]) + f"\n\nSaved to `{out_dir}` (mix plus aligned stems)",
+    return dict(title="Mashup Ready", audio=entry(outs["Mashup"]),
+                message=mash.report(P, p["vocals"], p["instrumental"]) + f"\n\nThe mix and its aligned stems are saved to `{out_dir}`",
                 folder=out_dir)
 
 
@@ -227,8 +226,8 @@ def run_shift(p, progress):
     semis, bpm = float(p.get("semitones") or 0), float(p.get("bpm") or 0)
     out, src, st = E["transform"].change(p["path"], semis, bpm, p.get("format") or E["common"].DEFAULT_FORMAT, progress)
     info = f"Saved `{out}`"
-    if src: info += f"\n\nDetected tempo {src:.2f} BPM → {bpm:g} BPM ({100 * (st - 1):+.2f}%)"
-    return dict(title="Render ready", audio=entry(out), message=info, folder=os.path.dirname(out))
+    if src: info += f"\n\nDetected tempo {src:.2f} BPM → {bpm:g} BPM, {100 * (st - 1):+.2f}%"
+    return dict(title="Shift Ready", audio=entry(out), message=info, folder=os.path.dirname(out))
 
 
 def plan_convert(p):
@@ -256,7 +255,7 @@ def run_convert(p, progress):
         rows.append([os.path.basename(f), r["format"], f"{r['sample_rate']} Hz, {'mono' if r['channels'] == 1 else 'stereo'}",
                      f"{r['before_mb']:.2f} MB", f"{r['after_mb']:.2f} MB", f"{r['change']:+.0f}%", os.path.basename(r["output"])])
     folder = os.path.dirname(outs[0]["path"]) if outs else os.path.join(output_root(), "Converted")
-    msg = f"Converted {len(outs)} of {len(files)} file(s) into `{folder}`."
+    msg = f"Converted {len(outs)} of {len(files)} file{'s' if len(files) != 1 else ''} into `{folder}`."
     if lossless_from_lossy:
         msg += ("\n\nNote: " + ", ".join(lossless_from_lossy) + " started as MP3/Ogg/Opus. Converting to WAV, AIFF or FLAC "
                 "makes the file bigger but cannot bring back detail the original compression removed.")

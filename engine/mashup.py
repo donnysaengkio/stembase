@@ -134,8 +134,8 @@ def render(P, vocal_files, instr_files, out_dir, title, vocal_gain_db=0.0, fmt=D
     inst = drums + bass + other
     act = np.abs(voc).mean(1) > 0.01 * (np.abs(voc).max() + 1e-9)
     if act.any(): voc *= (rms(inst[act]) * 0.85 * 10 ** (vocal_gain_db / 20)) / rms(voc[act])
-    outputs, stems = {}, [("Vocals (key and tempo matched)", voc), ("Instrumental (no vocals)", inst),
-                          ("Drums", drums), ("Bass", bass), ("Other instruments", other)]
+    outputs, stems = {}, [("Vocals", voc), ("Instrumental", inst),
+                          ("Drums", drums), ("Bass", bass), ("Other", other)]
     progress(0.65, "Mixing the mashup")
     outputs["Mashup"] = save_audio(os.path.join(out_dir, f"{title} (Mashup)"), master(inst + voc), fmt)
     progress(0.9, "Saving stems")
@@ -167,11 +167,11 @@ def report(P, vocal_path, instr_path):
     lines = [f"| | Vocals from | Instrumental from |", "|---|---|---|",
              f"| Track | {track_name(vocal_path)} | {track_name(instr_path)} |",
              f"| Tempo | {G_v['bpm']:.2f} BPM | {G_i['bpm']:.2f} BPM |",
-             f"| Key | {key_label(kv[0], kv[1])} ({camelot(kv[0], kv[1])}) | {key_label(ki[0], ki[1])} ({camelot(ki[0], ki[1])}) |",
+             f"| Key | {key_label(kv[0], kv[1])} · {camelot(kv[0], kv[1])} | {key_label(ki[0], ki[1])} · {camelot(ki[0], ki[1])} |",
              "", f"**Vocals pitch-shifted** {P['shift']:+d} semitones · **tempo changed** {100 * (P['stretch'] - 1):+.2f}%", "",
              "**Where the vocal sections land:**", "", "| Vocal section (original time) | Placed at |", "|---|---|"]
     for s in P["segments"]:
-        lines.append(f"| {fmt_time(max(s['src_start'], 0))} – {fmt_time(s['src_end'])} | {fmt_time(s['dst'])} (bar {s['dst_bar'] + 1}) |")
+        lines.append(f"| {fmt_time(max(s['src_start'], 0))} – {fmt_time(s['src_end'])} | {fmt_time(s['dst'])} · bar {s['dst_bar'] + 1} |")
     if not P["segments"]:
         lines.append("| No vocal sections found | – |")
     return "\n".join(lines)

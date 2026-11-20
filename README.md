@@ -16,9 +16,9 @@ internet connection is needed (the separation models are included).
 ## Tabs
 | Tab | What it does |
 |---|---|
-| **Analyze** | Key with Camelot code and confidence; tempo (fitted to 0.01 BPM) with half and double time; loudness (LUFS) and peak; length and format; first beat, downbeat and phrase start. **Chords**: the main progression, the most used chords and every chord change by bar number, also saved as a MIDI file (tick *Remove vocals first* for cleaner chords). |
-| **Split** | Vocals, drums, bass and other instruments, plus an instrumental (everything except the vocals). The 6-stem model adds guitar and piano; the best-quality model is slower and cleaner. Optionally makes **MIDI** from any of the stems. |
-| **MIDI** | Turns a vocal, bass line, piano, guitar, chords or drums into a MIDI file at the song's tempo, from a recording of just that part or from a full song (the part is separated out first). A synth preview and a piano roll to check the result. |
+| **Analyze** | Key with Camelot code and confidence; tempo (fitted to 0.01 BPM) with half and double time; loudness (LUFS) and peak; length and format; first beat, downbeat and phrase start. **Chords**: the main progression, the most used chords and every chord change by bar number, also saved as a MIDI file (tick *Remove Vocals* for cleaner chords). |
+| **Split** | Vocals, Drums, Bass and Other, plus an Instrumental: everything except the vocals. The 6-stem model adds guitar and piano; the best-quality model is slower and cleaner. Optionally makes **MIDI** from any of the stems. |
+| **MIDI** | Turns a vocal, bass line, piano, guitar, chords or drums into a MIDI file at the song's tempo, from a track stem or from a full song, where the part is separated out first. A synth preview and a piano roll to check the result. |
 | **Mix** | Vocals from one song over the music of another: key-matched, tempo-matched, with vocal sections placed on the instrumental's phrases. Saves the mix plus aligned stems. |
 | **Shift** | Shift by semitones and/or set a target BPM (the current tempo is detected for you). |
 | **Encode** | Convert any number of files between WAV, AIFF, FLAC, MP3, Opus and Ogg Vorbis, or fit each file into a size in MB. |

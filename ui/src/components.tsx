@@ -65,7 +65,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
               <>
                 <Md text={"⏳ " + m.job.message} />
                 <div className="bar-label">
-                  {(m.job.state === "queued" ? "Waiting for the previous job" : m.job.desc || "Starting") +
+                  {(m.job.state === "queued" ? "Waiting for the Previous Job" : m.job.desc || "Starting") +
                     ` · ${(m.job.progress * 100).toFixed(1)}%`}
                 </div>
                 <div className="bar"><div style={{ width: `${m.job.progress * 100}%` }} /></div>
@@ -73,7 +73,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                 <div className="row gap modal-actions">
                   <button className="grow" disabled={m.job.desc === "Cancelling…"} onClick={m.onCancel}>
                     {m.job.desc === "Cancelling…" ? "Cancelling…" : "Cancel"}</button>
-                  <button className="grow" title="Keep working in the background; Start shows the progress" onClick={m.onHide}>Hide</button>
+                  <button className="grow" title="Keep Working in the Background" onClick={m.onHide}>Hide</button>
                 </div>
               </>
             )}
@@ -124,7 +124,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
 
 /* ---------------- running a job ---------------- */
 /** Starts an engine job, shows its progress in the pop-up, then a confirmation (or closes, with autoClose). */
-export function useJob<R = any>(kind: string, openLabel = "Open folder", autoClose = false) {
+export function useJob<R = any>(kind: string, openLabel = "Open Folder", autoClose = false) {
   const modal = useModal();
   const [result, setResult] = useState<R | null>(null);
   const [running, setRunning] = useState<JobView | null>(null);   // this tab's job while it runs
@@ -225,7 +225,7 @@ export function FileDrop({ label, exts, value, onChange, multiple }: DropProps) 
           ? "\n\nFiles like `.asd` are a music app's analysis files saved next to the audio; drop the audio file itself (for example the `.wav`)."
           : "";
         const what = skipped.length === 1 ? "This isn't an audio file" : "These aren't audio files";
-        modal.show({ kind: "error", title: "Not an audio file", body: `${what} Stembase can open:\n\n${names}\n\nUse ${exts.join(", ")}.${hint}` });
+        modal.show({ kind: "error", title: "Not an Audio File", body: `${what} Stembase can open:\n\n${names}\n\nUse ${exts.join(", ")}.${hint}` });
       }
     });
     return () => { dropTargets.delete(id); };
@@ -244,8 +244,8 @@ export function FileDrop({ label, exts, value, onChange, multiple }: DropProps) 
       {empty ? (
         <button className="drop" onClick={choose}>
           <IconUpload size={26} />
-          <span className="drop-title">Drop audio here</span>
-          <span className="muted">or click to choose {multiple ? "files" : "a file"}</span>
+          <span className="drop-title">Drop Audio Here</span>
+          <span className="muted">Or Click to Choose {multiple ? "Files" : "a File"}</span>
         </button>
       ) : (
         <div className="picked">
@@ -257,7 +257,7 @@ export function FileDrop({ label, exts, value, onChange, multiple }: DropProps) 
             </div>
           ))}
           {!multiple && <Waveform path={value[0]} />}
-          <button className="link" onClick={choose}>{multiple ? "Add more files" : "Choose another file"}</button>
+          <button className="link" onClick={choose}>{multiple ? "Add More Files" : "Choose Another File"}</button>
         </div>
       )}
       {!inApp && (
@@ -280,7 +280,7 @@ export function AudioResult({ f, label }: { f: FileEntry; label?: string }) {
           <div className="result-title">{label || f.name}</div>
           <div className="muted small ellipsis" title={f.path}>{label ? f.name + " · " : ""}{sizeLabel(f.size)}</div>
         </div>
-        <button className="icon" title="Show in folder" onClick={() => openLocation(f.path)}><IconFolder size={18} /></button>
+        <button className="icon" title="Show in Folder" onClick={() => openLocation(f.path)}><IconFolder size={18} /></button>
       </div>
       <Waveform path={f.path} />
     </div>
@@ -390,7 +390,7 @@ export function FileList({ title, files }: { title: string; files: FileEntry[] }
           <IconFileMusic size={18} />
           <span className="grow ellipsis" title={f.path}>{f.name}</span>
           <span className="muted small">{sizeLabel(f.size)}</span>
-          <button className="icon" title="Show in folder" onClick={() => openLocation(f.path)}><IconFolder size={16} /></button>
+          <button className="icon" title="Show in Folder" onClick={() => openLocation(f.path)}><IconFolder size={16} /></button>
         </div>
       ))}
     </div>
@@ -508,13 +508,13 @@ export function RunRow({ label, onRun, folder, onReset, job }: {
         {mine ? `Working… ${Math.round(mine.progress * 100)}%` : label}
       </button>
       {job && (
-        <button className="big" disabled={!mine || cancelling} title={mine ? "Stop this job" : "Nothing is running"} onClick={job.cancel}>
+        <button className="big" disabled={!mine || cancelling} title={mine ? "Stop This Job" : "Nothing Is Running"} onClick={job.cancel}>
           {cancelling ? "Cancelling…" : "Cancel"}
         </button>
       )}
       <button className="big" onClick={() => openLocation(folder)}><IconFolder size={18} /> Open Folder</button>
       {onReset && (
-        <button className="big" disabled={busy} title="Clear this tab's file, settings and results" onClick={onReset}>
+        <button className="big" disabled={busy} title="Clear This Tab" onClick={onReset}>
           <IconRefresh size={18} /> Reset
         </button>
       )}

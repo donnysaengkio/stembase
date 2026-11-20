@@ -39,16 +39,16 @@ def load_mono(path, sr=22050):
 
 # label -> (extension, soundfile subtype or MP3 kbps, approx MB per stereo minute)
 FORMATS = {
-    "WAV 32-bit float (largest, never clips) · ~21 MB/min": ("wav", "FLOAT"),
-    "WAV 24-bit (studio) · ~16 MB/min": ("wav", "PCM_24"),
-    "WAV 16-bit (CD quality) · ~11 MB/min": ("wav", "PCM_16"),
-    "FLAC 24-bit (lossless) · ~8-11 MB/min": ("flac", "PCM_24"),
-    "FLAC 16-bit (lossless, CD quality) · ~5-7 MB/min": ("flac", "PCM_16"),
-    "MP3 320 kbps (high) · ~2.4 MB/min": ("mp3", 320),
-    "MP3 192 kbps (medium) · ~1.4 MB/min": ("mp3", 192),
-    "MP3 128 kbps (smallest) · ~1 MB/min": ("mp3", 128),
+    "WAV 32-Bit Float · ~21 MB/min": ("wav", "FLOAT"),
+    "WAV 24-Bit · ~16 MB/min": ("wav", "PCM_24"),
+    "WAV 16-Bit · ~11 MB/min": ("wav", "PCM_16"),
+    "FLAC 24-Bit · ~8-11 MB/min": ("flac", "PCM_24"),
+    "FLAC 16-Bit · ~5-7 MB/min": ("flac", "PCM_16"),
+    "MP3 320 kbps · ~2.4 MB/min": ("mp3", 320),
+    "MP3 192 kbps · ~1.4 MB/min": ("mp3", 192),
+    "MP3 128 kbps · ~1 MB/min": ("mp3", 128),
 }
-DEFAULT_FORMAT = "WAV 24-bit (studio) · ~16 MB/min"
+DEFAULT_FORMAT = "WAV 24-Bit · ~16 MB/min"
 
 
 def is_float_format(fmt):

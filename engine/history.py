@@ -38,9 +38,9 @@ def split(path, model_label=None):
     folder = found[0][1]
     names = [l.split(":")[0] for l, _ in found]
     which = names[0] + " model" if len(names) == 1 else _list(names) + " models"
-    return _found("Already split",
-                  f"**{track_name(path)}** was split before with the {which} (last on {_when(folder)}). "
-                  f"The stems are in `{folder}`.\n\nPress **Separate** again only to export in another format or to add MIDI.",
+    return _found("Already Split",
+                  f"**{track_name(path)}** was split before with the {which}, last on {_when(folder)}. "
+                  f"The stems are in `{folder}`.\n\nPress **Start** again only to export in another format or to add MIDI.",
                   folder)
 
 
@@ -49,9 +49,9 @@ def analysis(path):
     name = track_name(path)
     mid = os.path.join(output_root(), name, "MIDI", f"{name} - Chords.mid")
     if not os.path.exists(mid): return None
-    return _found("Analyzed before",
+    return _found("Analyzed Before",
                   f"The chords of **{name}** were saved on {_when(mid)} in `{os.path.dirname(mid)}`.\n\n"
-                  "Key, tempo and loudness aren't saved, so press **Analyze** to see them again.", os.path.dirname(mid))
+                  "Key, tempo and loudness aren't saved, so press **Start** to see them again.", os.path.dirname(mid))
 
 
 def midi(path):
@@ -61,9 +61,9 @@ def midi(path):
     mids = _files(folder, lambda f: f.lower().endswith(".mid"))
     if not mids: return None
     parts = [os.path.splitext(os.path.basename(m))[0].removeprefix(f"{name} - ") for m in mids]
-    return _found("MIDI made before",
-                  f"**{name}** already has MIDI for {_list(parts)} (latest on {_when(mids[0])}), in `{folder}`.\n\n"
-                  "Press **Make MIDI** again for another part or other settings. Making the same part again replaces its file.",
+    return _found("MIDI Made Before",
+                  f"**{name}** already has MIDI for {_list(parts)}, latest on {_when(mids[0])}, in `{folder}`.\n\n"
+                  "Press **Start** again for another part or other settings. Making the same part again replaces its file.",
                   folder)
 
 
@@ -73,9 +73,9 @@ def mashup(vpath, ipath):
     folder = os.path.join(output_root(), "Mashups", title)
     outs = _files(folder, lambda f: f.lower().endswith(AUDIO_EXTS))
     if not outs: return None
-    return _found("Mashup made before",
+    return _found("Mashup Made Before",
                   f"**{title}** was made on {_when(outs[0])}, in `{folder}`.\n\n"
-                  "Press **Make mashup** again to remake it with other settings. It replaces the earlier files.", folder)
+                  "Press **Start** again to remake it with other settings. It replaces the earlier files.", folder)
 
 
 def shift(path):
@@ -85,9 +85,9 @@ def shift(path):
     outs = _files(folder, lambda f: f.startswith(f"{name} (") and f.lower().endswith(AUDIO_EXTS))
     if not outs: return None
     tags = list(dict.fromkeys(os.path.splitext(os.path.basename(o))[0][len(name) + 2:-1] for o in outs))
-    return _found("Shifted before",
-                  f"**{name}** already has {'a version' if len(tags) == 1 else 'versions'} at {_list(tags)} "
-                  f"(latest on {_when(outs[0])}), in `{folder}`.\n\nRendering the same settings again replaces that file.",
+    return _found("Shifted Before",
+                  f"**{name}** already has {'a version' if len(tags) == 1 else 'versions'} at {_list(tags)}, "
+                  f"latest on {_when(outs[0])}, in `{folder}`.\n\nRendering the same settings again replaces that file.",
                   folder)
 
 
@@ -102,6 +102,6 @@ def converted(paths):
     if not done: return None
     head = (f"**{done[0]}** is" if len(paths) == 1 else
             f"{len(done)} of these {len(paths)} files {'is' if len(done) == 1 else 'are'}")
-    return _found("Converted before",
+    return _found("Converted Before",
                   f"{head} already in `{folder}`{'' if len(paths) == 1 else ': ' + _list(done)}.\n\n"
                   "Converting again saves a new numbered copy; it doesn't replace the old one.", folder)

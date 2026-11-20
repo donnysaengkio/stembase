@@ -49,7 +49,7 @@ export function useUpdates(info: Info, prefs: Prefs) {
       });
       await relaunch();
     } catch (e) {
-      modal.show({ kind: "error", title: "Couldn't update Stembase", body: String(e) });
+      modal.show({ kind: "error", title: "Couldn't Update Stembase", body: String(e) });
     }
   }
 
@@ -64,14 +64,23 @@ export function useUpdates(info: Info, prefs: Prefs) {
 
   async function checkNow() {
     if (!inApp) return modal.show({ kind: "ask", title: "Check For Updates", body: "Updates are checked in the installed app." });
-    modal.show({ kind: "working", title: "Checking for updates", desc: "Asking GitHub for the latest Stembase", pct: null });
+    modal.show({ kind: "working", title: "Checking for Updates", desc: "Asking GitHub for the latest Stembase", pct: null });
     try {
       const u = await check({ timeout: 20000 });
       if (u) offer(u);
-      else modal.show({ kind: "ask", title: "Stembase is up to date", body: `You have Stembase ${info.version}, the latest.` });
+      else upToDate();
     } catch (e) {
-      modal.show({ kind: "error", title: "Couldn't check for updates", body: String(e) });
+      const err = String(e);
+      // No full release published yet (only previews), so GitHub has no latest.json: nothing newer to offer.
+      if (/valid release JSON/i.test(err)) upToDate();
+      else if (/sending request|connect|dns|timed out|timeout|network/i.test(err))
+        modal.show({ kind: "error", title: "Couldn't Check for Updates", body: "Stembase couldn't reach GitHub. Check your internet connection and try again." });
+      else modal.show({ kind: "error", title: "Couldn't Check for Updates", body: err });
     }
+  }
+
+  function upToDate() {
+    modal.show({ kind: "ask", title: "You Have the Latest Version", body: `Stembase ${info.version} is the newest version.` });
   }
 
   // Each time Stembase opens, quietly (Preferences can turn this off): a notice only when there is a newer version.
@@ -102,16 +111,16 @@ export function useQuit() {
 /* ---------------- keyboard shortcuts ---------------- */
 export const SHORTCUTS: [string, string][] = [
   ["General", ""],
-  [`${MOD}+U`, "Check for updates"],
+  [`${MOD}+U`, "Check for Updates"],
   [`${MOD}+,`, "Preferences"],
-  [`${MOD}+?`, "Keyboard shortcuts"],
+  [`${MOD}+?`, "Keyboard Shortcuts"],
   [`${MOD}+Q`, "Quit Stembase"],
   ["Working", ""],
   [`${MOD}+1 … 6`, "Go to Analyze, Split, MIDI, Mix, Shift or Encode"],
-  [`${MOD}+O`, "Choose an audio file for this tab"],
-  [`${MOD}+Enter`, "Start this tab's job (Analyze, Separate, …)"],
-  [`${MOD}+Shift+R`, "Open the Output folder"],
-  ["Esc", "Close a dialog or menu"],
+  [`${MOD}+O`, "Choose an Audio File for This Tab"],
+  [`${MOD}+Enter`, "Start This Tab's Job"],
+  [`${MOD}+Shift+R`, "Open the Output Folder"],
+  ["Esc", "Close a Dialog or Menu"],
 ];
 
 export function useShortcuts(acts: {
@@ -164,7 +173,7 @@ export function MainMenu({ checkUpdates, quit }: { checkUpdates: () => void; qui
   ];
   return (
     <div className="menu-wrap" ref={box}>
-      <button className="icon-btn gear-btn" title="Main menu" aria-label="Main menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button className="icon-btn gear-btn" title="Settings" aria-label="Settings" aria-expanded={open} onClick={() => setOpen(!open)}>
         <IconSettings size={24} stroke={1.75} />
       </button>
       {open && (
@@ -213,19 +222,19 @@ function OutputFolder({ info, patchInfo }: { info: Info; patchInfo: (p: Partial<
   };
   const change = async () => {
     const dir = inApp
-      ? await pickFolder({ directory: true, defaultPath: info.output_dir, title: "Choose the Output folder" })
-      : prompt("Output folder", info.output_dir);   // browser preview has no folder dialog
+      ? await pickFolder({ directory: true, defaultPath: info.output_dir, title: "Choose the Output Folder" })
+      : prompt("Output Folder", info.output_dir);   // browser preview has no folder dialog
     if (typeof dir === "string" && dir) use(dir);
   };
   const isDefault = info.output_dir === info.default_output_dir;
   return (
     <>
       <div className="pref-row top">
-        <span className="pref-label">Output folder</span>
+        <span className="pref-label">Output Folder</span>
         <div className="pref-control wide">
           <div className="folder-path" title={info.output_dir}><IconFolder size={16} /><span>{info.output_dir}</span></div>
           <div className="pref-buttons">
-            <button disabled={busy} title={busy ? "Wait for the current job to finish" : undefined} onClick={change}>Change…</button>
+            <button disabled={busy} title={busy ? "Wait for the Current Job to Finish" : undefined} onClick={change}>Change…</button>
             <button onClick={() => openLocation(info.output_dir)}>Open</button>
             {!isDefault && <button disabled={busy} onClick={() => use(null)}>Use Default</button>}
           </div>
@@ -255,7 +264,7 @@ function Processing({ info, patchInfo }: { info: Info; patchInfo: (p: Partial<In
       </div>
       <p className="muted small pref-note">
         {info.gpu
-          ? <>Stem separation runs on <b>{info.device}</b>. Automatic uses the graphics card ({info.gpu}) and falls back to the CPU if it fails; CPU never uses it. Takes effect from the next job.</>
+          ? <>Stem separation runs on <b>{info.device}</b>. Automatic uses the {info.gpu} and falls back to the CPU if it fails; CPU never uses it. Takes effect from the next job.</>
           : <>No supported graphics card was found, so everything runs on the CPU.</>}
       </p>
       {error && <p className="small pref-error">{error}</p>}
@@ -275,20 +284,20 @@ function Preferences({ info, prefs, setPrefs, checkUpdates, patchInfo }: PrefsPr
             onChange={(v) => setPrefs({ ...prefs, theme: v === "Light" ? "light" : "dark" })} />
         </div>
       </div>
-      <Check checked={prefs.followSystem} onChange={(v) => setPrefs({ ...prefs, followSystem: v })} label="Follow system" />
+      <Check checked={prefs.followSystem} onChange={(v) => setPrefs({ ...prefs, followSystem: v })} label="Follow System" />
       <p className="muted small pref-note">Light while {system} shows apps in light mode, and Dark otherwise.</p>
       <div className="pref-heading">Output</div>
       <OutputFolder info={info} patchInfo={patchInfo} />
       <p className="muted small pref-note">New results are saved here; results already saved stay where they are.</p>
       <div className="pref-row">
-        <span className="pref-label">Default format</span>
+        <span className="pref-label">Default Format</span>
         <div className="pref-control wide"><Select value={prefs.format} options={info.formats} onChange={(v) => setPrefs({ ...prefs, format: v })} /></div>
       </div>
       <p className="muted small pref-note">Split, Mix and Shift start with this format; each can be changed in the tab.</p>
       <div className="pref-heading">Processing</div>
       <Processing info={info} patchInfo={patchInfo} />
       <div className="pref-heading">Updates</div>
-      <Check checked={prefs.checkUpdates} onChange={(v) => setPrefs({ ...prefs, checkUpdates: v })} label="Check for updates when Stembase opens" />
+      <Check checked={prefs.checkUpdates} onChange={(v) => setPrefs({ ...prefs, checkUpdates: v })} label="Check for Updates When Stembase Opens" />
       <p className="muted small pref-note">You have Stembase {info.version}.</p>
       <button onClick={() => { show(null); checkUpdates(); }}>Check For Updates</button>
     </>

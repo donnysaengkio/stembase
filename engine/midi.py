@@ -9,16 +9,16 @@ from .common import output_root, track_name, check_input, SR
 
 # What each part is, which stem holds it in a full song, and how to transcribe it.
 PARTS = {
-    "Vocals / lead melody": dict(stem="vocals", kind="pitched", mono=True, fmin=80, fmax=1100, program=0),
+    "Vocals / Lead Melody": dict(stem="vocals", kind="pitched", mono=True, fmin=80, fmax=1100, program=0),
     "Bass": dict(stem="bass", kind="pitched", mono=True, fmin=28, fmax=330, program=33),
-    "Chords & instruments": dict(stem="other", kind="pitched", mono=False, fmin=40, fmax=4200, program=0),
+    "Chords & Instruments": dict(stem="other", kind="pitched", mono=False, fmin=40, fmax=4200, program=0),
     "Piano": dict(stem="piano", kind="pitched", mono=False, fmin=27, fmax=4200, program=0),
     "Guitar": dict(stem="guitar", kind="pitched", mono=False, fmin=80, fmax=1400, program=25),
     "Drums": dict(stem="drums", kind="drums"),
 }
-STEM_PART = {"vocals": "Vocals / lead melody", "bass": "Bass", "other": "Chords & instruments", "piano": "Piano",
+STEM_PART = {"vocals": "Vocals / Lead Melody", "bass": "Bass", "other": "Chords & Instruments", "piano": "Piano",
              "guitar": "Guitar", "drums": "Drums"}
-SNAP = {"Off (keep the exact timing)": 0, "1/8 notes": 2, "1/16 notes": 4, "1/32 notes": 8}   # grid steps per beat
+SNAP = {"Off": 0, "1/8 Notes": 2, "1/16 Notes": 4, "1/32 Notes": 8}   # grid steps per beat
 DRUM_NOTES = {"kick": 36, "snare": 38, "hihat": 42}
 DRUM_NAMES = {36: "Kick", 38: "Snare / clap", 42: "Hi-hat"}
 _model = None
@@ -220,7 +220,7 @@ def describe(r, part):
     lines = [f"**{len(n)} notes** · tempo in the file {r['bpm']:.2f} BPM"]
     if r["is_drum"]:
         c = {k: sum(1 for x in n if x[2] == k) for k in DRUM_NAMES}
-        lines.append(" · ".join(f"{DRUM_NAMES[k]}: {v}" for k, v in c.items()) + " (General MIDI drum notes 36 / 38 / 42)")
+        lines.append(" · ".join(f"{DRUM_NAMES[k]}: {v}" for k, v in c.items()) + " · General MIDI drum notes 36 / 38 / 42")
     else:
         lo, hi = min(x[2] for x in n), max(x[2] for x in n)
         nm = lambda p: f"{librosa.midi_to_note(p, unicode=False)}"
@@ -237,7 +237,7 @@ def audio_to_midi(path, part, full_song=False, sensitivity=0.5, min_ms=80, snap_
     if full_song:
         from .separate import separate
         model = "htdemucs_6s" if cfg["stem"] in ("piano", "guitar") else "htdemucs"
-        progress(0.05, f"Separating the {cfg['stem']} from the song (cached after the first time)")
+        progress(0.05, f"Separating the {cfg['stem']} from the song")
         files = separate(path, model, lambda f, d="": progress(0.05 + 0.6 * f, d))
         src = files[cfg["stem"]]
         progress(0.68, "Finding the tempo")
@@ -247,7 +247,7 @@ def audio_to_midi(path, part, full_song=False, sensitivity=0.5, min_ms=80, snap_
     r = transcribe(src, part, out, sensitivity, min_ms, snap_label, grid, title=f"{name} {part}")
     progress(0.92, "Rendering a preview")
     dur = sf.info(src).duration
-    prev = os.path.join(folder, ".preview", f"{name} - {part.replace(' / ', ' & ')} (MIDI preview).wav")
+    prev = os.path.join(folder, ".preview", f"{name} - {part.replace(' / ', ' & ')} - MIDI Preview.wav")
     os.makedirs(os.path.dirname(prev), exist_ok=True)
     sf.write(prev, preview(r["notes"], r["is_drum"], dur), SR, subtype="PCM_16")
     return dict(midi=out, preview=prev, image=piano_roll(r["notes"], r["is_drum"], dur), info=describe(r, part), folder=folder)

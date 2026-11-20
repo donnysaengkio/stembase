@@ -173,11 +173,11 @@ def chord_source(path, remove_vocals=False, progress=lambda f, d="": None):
     from . import separate as sep
     for m in ("htdemucs_ft", "htdemucs", "htdemucs_6s"):
         f = os.path.join(sep.cache_dir(path, m), "instrumental.wav")
-        if os.path.exists(f): return f, "the instrumental from your earlier split (vocals removed)"
+        if os.path.exists(f): return f, "the instrumental from your earlier split, with the vocals removed"
     if remove_vocals:
         files = sep.separate(path, "htdemucs", progress)
-        return files["instrumental"], "an instrumental made for this (vocals removed)"
-    return None, "the full mix (vocals included; tick “Remove vocals first” for cleaner chords)"
+        return files["instrumental"], "an instrumental made for this, with the vocals removed"
+    return None, "the full mix, vocals included. Tick Remove Vocals for cleaner chords"
 
 
 def from_track(path, details, remove_vocals=False, progress=lambda f, d="": None):

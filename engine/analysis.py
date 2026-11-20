@@ -103,7 +103,7 @@ def file_info(path):
         i = sf.info(path)
         depth = {"PCM_16": "16-bit", "PCM_24": "24-bit", "PCM_32": "32-bit", "FLOAT": "32-bit float", "DOUBLE": "64-bit float",
                  "PCM_U8": "8-bit", "PCM_S8": "8-bit"}.get(i.subtype, i.subtype_info)
-        return {"File format": f"{i.format_info}, {depth}", "Sample rate": f"{i.samplerate} Hz",
+        return {"File Format": f"{i.format_info.split(' (')[0]}, {depth}", "Sample Rate": f"{i.samplerate} Hz",
                 "Channels": {1: "Mono", 2: "Stereo"}.get(i.channels, str(i.channels))}
     except Exception:
         return {}
@@ -122,7 +122,7 @@ def analyze(path, bpm_range=(70, 180), progress=lambda f, d="": None, details=No
     keys = detect_key(harm)
     r, pc, mode = keys[0]
     rel = (pc + 3) % 12 if mode == "min" else (pc + 9) % 12
-    alts = [f"{key_label(p, m)} ({camelot(p, m)}, {c:.2f})" for c, p, m in keys[1:4]]
+    alts = [f"{key_label(p, m)} · {camelot(p, m)} · {c:.2f}" for c, p, m in keys[1:4]]
     progress(0.9, "Measuring loudness")
     lufs, peak = loudness(path)
     if details is not None:
@@ -130,16 +130,16 @@ def analyze(path, bpm_range=(70, 180), progress=lambda f, d="": None, details=No
     return {
         **file_info(path),
         "Duration": fmt_time(g["duration"]),
-        "Tempo (BPM)": f"{g['bpm']:.2f}",
-        "Half / double time": f"{g['bpm'] / 2:.2f} / {g['bpm'] * 2:.2f}",
+        "Tempo": f"{g['bpm']:.2f} BPM",
+        "Half / Double Time": f"{g['bpm'] / 2:.2f} / {g['bpm'] * 2:.2f}",
         "Key": key_label(pc, mode),
         "Camelot": camelot(pc, mode),
-        "Key confidence": f"{r:.2f}  (0.6+ is strong, under 0.4 is unclear)",
-        "Relative key (same notes)": key_label(rel, "maj" if mode == "min" else "min"),
-        "Other likely keys": "; ".join(alts),
-        "First beat at": f"{g['t0']:.3f} s",
-        "First downbeat (bar 1) at": f"{g['first_downbeat']:.3f} s",
-        "8-bar phrases start at": f"{g['phrase_start']:.3f} s",
+        "Key Confidence": f"{r:.2f} · 0.6+ is strong, under 0.4 is unclear",
+        "Relative Key": key_label(rel, "maj" if mode == "min" else "min"),
+        "Other Likely Keys": "; ".join(alts),
+        "First Beat": f"{g['t0']:.3f} s",
+        "First Downbeat": f"{g['first_downbeat']:.3f} s",
+        "8-Bar Phrases Start": f"{g['phrase_start']:.3f} s",
         "Loudness": f"{lufs} LUFS" if lufs is not None else "n/a",
         "Peak": f"{peak} dBFS" if peak is not None else "n/a",
     }

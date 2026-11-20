@@ -7,12 +7,12 @@ from . import gpu
 from .common import output_root, MODELS_DIR, track_name, load_stereo, save_float, save_audio, headroom_gain, DEFAULT_FORMAT
 
 MODELS = {
-    "Balanced: 4 stems (htdemucs)": "htdemucs",
-    "Best quality: 4 stems, ~4x slower (htdemucs_ft)": "htdemucs_ft",
-    "6 stems: adds guitar and piano (htdemucs_6s)": "htdemucs_6s",
+    "Balanced: 4 Stems": "htdemucs",
+    "Best Quality: 4 Stems, ~4× Slower": "htdemucs_ft",
+    "6 Stems: Adds Guitar and Piano": "htdemucs_6s",
 }
-LABELS = {"vocals": "Vocals", "drums": "Drums", "bass": "Bass", "other": "Other instruments", "guitar": "Guitar", "piano": "Piano",
-          "instrumental": "Instrumental (no vocals)"}
+LABELS = {"vocals": "Vocals", "drums": "Drums", "bass": "Bass", "other": "Other", "guitar": "Guitar", "piano": "Piano",
+          "instrumental": "Instrumental"}
 _cache = {}
 
 

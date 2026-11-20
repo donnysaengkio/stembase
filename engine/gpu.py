@@ -60,7 +60,7 @@ def kind():
 def label():
     """How the app names the processor in use, e.g. 'GPU (AMD Radeon RX 6950 XT)' or 'CPU'."""
     g = gpu()
-    return f"GPU ({g[2]})" if g and mode() != "CPU" else "CPU"
+    return g[2] if g and mode() != "CPU" else "CPU"
 
 
 def patch_demucs():
