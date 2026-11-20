@@ -75,6 +75,7 @@ server.py              the audio engine as a local web API (token-protected, one
 engine/                analysis, separation, chords, MIDI, mashup, key/tempo, conversion, "done before" checks
 ui/                    the Tauri app: src/ (React interface), src-tauri/ (Rust shell that starts and stops the engine)
 branding/              the logo (T1e) as SVG, and make_icon.py for the app icon
+docs/adr/              architecture decision records: why Stembase is built the way it is
 stembase_engine.spec   PyInstaller recipe for the engine, bundled into the app
 build.py               builds the engine, the app and the installer for the current system
 models/                Demucs models (htdemucs, htdemucs_ft, htdemucs_6s); not in git
@@ -88,6 +89,8 @@ legacy/                the old Gradio interface of Stem Studio 1.x, for referenc
 - **All three systems at once:** the GitHub Actions workflow `.github/workflows/build.yml` builds Windows, macOS (Apple Silicon and Intel) and Linux on GitHub and publishes a release with `latest.json` for Check For Updates. Its header lists the one-time setup (signing-key secret and a `models` release).
 - **Update signing:** updates are signed with `~/.tauri/stembase.key` (keep it private and backed up: without it, installed copies can't be updated). Its public half is in `ui/src-tauri/tauri.conf.json`. The app checks `https://github.com/donnysaengkio/stembase/releases/latest/download/latest.json`; change that URL there if the repository has another name.
 - **Rename the app:** `APP_NAME` in `engine/meta.py`, `productName` in `ui/src-tauri/tauri.conf.json`, and `name` in `ui/package.json`.
+
+Important decisions are recorded in [docs/adr](docs/adr/README.md): add a new record when you make one.
 
 ## Built with
 Tauri and React (app), Demucs (Meta, stem separation), Basic Pitch (Spotify, audio to MIDI), librosa (analysis),
