@@ -25,9 +25,13 @@ Uninstalling keeps your results.
 | **Shift** | Shift by semitones and/or set a target BPM (the current tempo is detected for you). |
 | **Encode** | Convert any number of files between WAV, AIFF, FLAC, MP3, Opus and Ogg Vorbis, or fit each file into a size in MB. |
 
-| Split: five stems, each with its own player | MIDI before a job: the right side shows what will appear |
+| Analyze | Split |
 |---|---|
-| ![Split tab with vocals, drums, bass, other instruments and instrumental stems](docs/screenshots/split.png) | ![MIDI tab with the outline of its results](docs/screenshots/midi.png) |
+| ![Analyze tab: key, tempo, loudness, length and chords](docs/screenshots/analyze.png) | ![Split tab: vocals, drums, bass, other instruments and an instrumental, each with a player](docs/screenshots/split.png) |
+| **MIDI** | **Mix** |
+| ![MIDI tab: the MIDI file, a synth preview and a piano roll](docs/screenshots/midi.png) | ![Mix tab with two tracks loaded; before a job, the right side shows what will appear](docs/screenshots/mix.png) |
+| **Shift** | **Encode** |
+| ![Shift tab: up 2 semitones and to 128 BPM](docs/screenshots/shift.png) | ![Encode tab: a WAV converted to MP3 with a before-and-after table](docs/screenshots/encode.png) |
 
 Drop files anywhere on a tab's drop zone, or click it to choose. Every job shows its progress in a window, then
 confirms where it saved the result. If you load a file that was already processed, Stembase says so and offers the folder.
