@@ -77,6 +77,17 @@ jobs:
       - name: Build the audio engine
         run: python -m PyInstaller stembase_engine.spec --noconfirm
 
+      # AppImage: linuxdeploy checks every library in the bundle, including the engine's own (torch etc.), so it needs
+      # to know the folders those are in, at the path they get inside the AppImage.
+      - name: Engine library folders for linuxdeploy (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          app="$GITHUB_WORKSPACE/ui/src-tauri/target/release/bundle/appimage/Stembase.AppDir/usr/lib/Stembase/engine"
+          dirs=$(cd dist/stembase-engine && find . -name '*.so*' -printf '%h\n' | sort -u | sed "s|^\.|$app|" | paste -sd:)
+          echo "LD_LIBRARY_PATH=$dirs" >> "$GITHUB_ENV"
+          echo "$dirs" | tr : '\n' | head -20
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
