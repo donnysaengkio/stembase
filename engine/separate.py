@@ -3,6 +3,7 @@ import os
 import numpy as np
 import soundfile as sf
 import torch
+from . import gpu
 from .common import output_root, MODELS_DIR, track_name, load_stereo, save_float, save_audio, headroom_gain, DEFAULT_FORMAT
 
 MODELS = {
@@ -16,7 +17,8 @@ _cache = {}
 
 
 def device():
-    return "cuda" if torch.cuda.is_available() else "cpu"
+    """'cuda', 'directml' or 'cpu': what separation runs on now (see engine/gpu.py)."""
+    return gpu.kind()
 
 
 def _model(name):
@@ -58,7 +60,7 @@ def separate(path, model="htdemucs", progress=lambda f, d="": None):
     x = load_stereo(path, m.samplerate)
     wav = torch.tensor(x.T)
     ref = wav.mean(0); mean, std = ref.mean(), ref.std() + 1e-8
-    label = f"Separating on {device().upper()}"
+    label = f"Separating on the {gpu.label()}"
     progress(0.1, label)
     # One overall figure across every model in the bag (Best quality runs 4 models one after another), 10% → 90%.
     n, best = wav.shape[-1], [0.0]
@@ -70,9 +72,23 @@ def separate(path, model="htdemucs", progress=lambda f, d="": None):
             best[0] = f
             progress(0.1 + 0.8 * f, label)
 
+    dev = gpu.device()
+    if dev.type == "privateuseone": gpu.patch_demucs()
+
+    def run(d):
+        return apply_model(m, ((wav - mean) / std)[None], device=d, shifts=1, split=True, overlap=0.25, callback=tick)[0]
+
     with torch.no_grad():
-        stems = apply_model(m, ((wav - mean) / std)[None], device=device(), shifts=1, split=True,
-                            overlap=0.25, callback=tick)[0]
+        try:
+            stems = run(dev)
+        except Exception:   # a graphics-card problem (driver, memory): do this job on the CPU instead
+            if dev.type == "cpu": raise
+            import traceback
+            traceback.print_exc()
+            label = "The GPU failed, so separating on the CPU"
+            best[0] = 0.0
+            progress(0.1, label)
+            stems = run(torch.device("cpu"))
     stems = (stems * std + mean).cpu().numpy()
     inst = np.zeros_like(stems[0])
     for s, a in zip(m.sources, stems):

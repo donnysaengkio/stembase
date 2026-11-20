@@ -22,7 +22,7 @@ def _data_dir():
 DATA_DIR = _data_dir()
 MODELS_DIR = os.path.join(RES_DIR, "models")   # Demucs models shipped with the app: models/<name>/<name>.yaml + *.safetensors
 ICON = os.path.join(RES_DIR, "stembase.ico")
-SETTINGS = os.path.join(DATA_DIR, "settings.json")   # engine settings kept between runs (the Output folder)
+SETTINGS = os.path.join(DATA_DIR, "settings.json")   # engine settings kept between runs (Output folder, processor)
 
 
 def _settings():
@@ -33,7 +33,21 @@ def _settings():
         return {}
 
 
-_output = _settings().get("output_dir") or DEFAULT_OUTPUT_DIR
+def setting(key, default=None):
+    """A saved engine setting (settings.json in the app-data folder)."""
+    v = _settings().get(key)
+    return default if v is None else v
+
+
+def save_setting(key, value):
+    s = _settings()
+    s[key] = value
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(SETTINGS, "w", encoding="utf-8") as f:
+        json.dump(s, f, indent=2)
+
+
+_output = setting("output_dir") or DEFAULT_OUTPUT_DIR
 
 
 def output_root():
@@ -50,10 +64,6 @@ def set_output_root(path):
     with open(probe, "w") as f:
         f.write("ok")
     os.remove(probe)
-    s = _settings()
-    s["output_dir"] = None if path == DEFAULT_OUTPUT_DIR else path
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(SETTINGS, "w", encoding="utf-8") as f:
-        json.dump(s, f, indent=2)
+    save_setting("output_dir", None if path == DEFAULT_OUTPUT_DIR else path)
     _output = path
     return path

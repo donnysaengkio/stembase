@@ -7,7 +7,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { open as pickFolder } from "@tauri-apps/plugin-dialog";
 import { IconFolder, IconSettings, IconX } from "@tabler/icons-react";
-import { inApp, Info, openLocation, setOutputFolder } from "./api";
+import { inApp, Info, openLocation, setOutputFolder, setProcessing } from "./api";
 import { Check, Select, useModal } from "./components";
 
 const REPO = "https://github.com/donnysaengkio/stembase";
@@ -201,15 +201,15 @@ function Keys({ keys }: { keys: string }) {
   return <span className="keys">{keys.split("+").map((k, i) => <span key={i}>{i > 0 && <span className="plus">+</span>}<kbd>{k}</kbd></span>)}</span>;
 }
 
-type PrefsProps = { info: Info; prefs: Prefs; setPrefs: (p: Prefs) => void; checkUpdates: () => void; setOutput: (dir: string) => void };
+type PrefsProps = { info: Info; prefs: Prefs; setPrefs: (p: Prefs) => void; checkUpdates: () => void; patchInfo: (p: Partial<Info>) => void };
 
 /** The Output folder: shown in full, with Change…, Open and (once changed) Use Default. */
-function OutputFolder({ info, setOutput }: { info: Info; setOutput: (dir: string) => void }) {
+function OutputFolder({ info, patchInfo }: { info: Info; patchInfo: (p: Partial<Info>) => void }) {
   const { busy } = useModal();
   const [error, setError] = useState("");
   const use = async (path: string | null) => {
     setError("");
-    try { setOutput(await setOutputFolder(path)); } catch (e: any) { setError(String(e.message || e)); }
+    try { patchInfo({ output_dir: await setOutputFolder(path) }); } catch (e: any) { setError(String(e.message || e)); }
   };
   const change = async () => {
     const dir = inApp
@@ -236,7 +236,34 @@ function OutputFolder({ info, setOutput }: { info: Info; setOutput: (dir: string
   );
 }
 
-function Preferences({ info, prefs, setPrefs, checkUpdates, setOutput }: PrefsProps) {
+/** Automatic / GPU / CPU for stem separation, with the graphics card Stembase found. */
+function Processing({ info, patchInfo }: { info: Info; patchInfo: (p: Partial<Info>) => void }) {
+  const { busy } = useModal();
+  const [error, setError] = useState("");
+  const change = async (mode: string) => {
+    setError("");
+    try { const r = await setProcessing(mode); patchInfo({ processing: r.processing, device: r.device }); }
+    catch (e: any) { setError(String(e.message || e)); }
+  };
+  return (
+    <>
+      <div className="pref-row">
+        <span className="pref-label">Processor</span>
+        <div className={"pref-control" + (busy || !info.gpu ? " disabled" : "")}>
+          <Select value={info.gpu ? info.processing : "CPU"} options={info.gpu ? info.processing_modes : ["CPU"]} onChange={change} />
+        </div>
+      </div>
+      <p className="muted small pref-note">
+        {info.gpu
+          ? <>Stem separation runs on <b>{info.device}</b>. Automatic uses the graphics card ({info.gpu}) and falls back to the CPU if it fails; CPU never uses it. Takes effect from the next job.</>
+          : <>No supported graphics card was found, so everything runs on the CPU.</>}
+      </p>
+      {error && <p className="small pref-error">{error}</p>}
+    </>
+  );
+}
+
+function Preferences({ info, prefs, setPrefs, checkUpdates, patchInfo }: PrefsProps) {
   const system = MAC ? "macOS" : navigator.userAgent.includes("Windows") ? "Windows" : "your desktop";
   return (
     <>
@@ -251,13 +278,15 @@ function Preferences({ info, prefs, setPrefs, checkUpdates, setOutput }: PrefsPr
       <Check checked={prefs.followSystem} onChange={(v) => setPrefs({ ...prefs, followSystem: v })} label="Follow system" />
       <p className="muted small pref-note">Light while {system} shows apps in light mode, and Dark otherwise.</p>
       <div className="pref-heading">Output</div>
-      <OutputFolder info={info} setOutput={setOutput} />
+      <OutputFolder info={info} patchInfo={patchInfo} />
       <p className="muted small pref-note">New results are saved here; results already saved stay where they are.</p>
       <div className="pref-row">
         <span className="pref-label">Default format</span>
         <div className="pref-control wide"><Select value={prefs.format} options={info.formats} onChange={(v) => setPrefs({ ...prefs, format: v })} /></div>
       </div>
       <p className="muted small pref-note">Split, Mix and Shift start with this format; each can be changed in the tab.</p>
+      <div className="pref-heading">Processing</div>
+      <Processing info={info} patchInfo={patchInfo} />
       <div className="pref-heading">Updates</div>
       <Check checked={prefs.checkUpdates} onChange={(v) => setPrefs({ ...prefs, checkUpdates: v })} label="Check for updates when Stembase opens" />
       <p className="muted small pref-note">You have Stembase {info.version}.</p>

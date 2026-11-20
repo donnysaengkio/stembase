@@ -35,7 +35,7 @@ input: WAV, MP3, FLAC, OGG, Opus, AIFF. **Open Folder** next to each tab's run b
 | Item | Shortcut (⌘ on a Mac) | |
 |---|---|---|
 | Check For Updates | Ctrl+U | Downloads, installs and reopens a newer Stembase, signed by its maker |
-| Preferences | Ctrl+, | Theme (Dark, Light or Follow system), Output folder (Change…, Open, Use Default), default format, check for updates when Stembase opens |
+| Preferences | Ctrl+, | Theme (Dark, Light or Follow system), Output folder (Change…, Open, Use Default), default format, processor (Automatic, GPU or CPU), check for updates when Stembase opens |
 | Keyboard Shortcuts | Ctrl+? | Also: Ctrl+1…6 tabs, Ctrl+O choose a file, Ctrl+Enter start the job, Ctrl+Shift+R open the Output folder, Esc close |
 | About Stembase | | Version, links, Output and log folders |
 | Quit Stembase | Ctrl+Q | Asks first while a job is running |
@@ -50,8 +50,16 @@ The engine's log is `engine-log.txt` in `%LOCALAPPDATA%\Stembase` (Windows), `~/
 (macOS) or `~/.local/share/Stembase` (Linux). About → Open Log Folder opens it.
 
 ## Speed
-Separation runs on an NVIDIA GPU with CUDA when there is one, otherwise on the CPU: roughly 1–2 minutes per song for
-the Balanced model on a modern CPU, about four times that for Best quality.
+Stem separation runs on the graphics card when Stembase finds one, otherwise on the CPU. Preferences → Processing
+chooses **Automatic** (the graphics card, falling back to the CPU if it fails), **GPU** or **CPU**.
+
+- **Windows:** any DirectX 12 graphics card (AMD, Intel or NVIDIA) through Microsoft's DirectML. Measured on an AMD
+  Radeon RX 6950 XT: about 1.9× faster than the CPU for Balanced and 1.4× for Best quality; the first job after opening
+  Stembase spends a few extra seconds warming up the card.
+- **NVIDIA with CUDA:** much faster still, when the engine is built with a CUDA build of PyTorch.
+- **CPU:** roughly 1–2 minutes per song for Balanced on a modern CPU, about four times that for Best quality.
+
+Analysis, MIDI transcription, key/tempo changes and conversion run on the CPU.
 
 ## For developers
 ```
@@ -65,7 +73,7 @@ models/                Demucs models (htdemucs, htdemucs_ft, htdemucs_6s); not i
 legacy/                the old Gradio interface of Stem Studio 1.x, for reference only
 ```
 
-- **Packages:** `Install requirements.bat` (or `pip install -r requirements.txt` and `pip install --no-deps basic-pitch==0.4.0`), then `cd ui && npm install`.
+- **Packages:** in a `.venv` in the project folder (`build.py` uses it when it exists): `python -m venv .venv`, then with its Python `pip install -r requirements.txt pyinstaller` and `pip install --no-deps basic-pitch==0.4.0`, then `cd ui && npm install`. On Windows this brings `torch-directml`, which needs PyTorch 2.4, hence the separate environment.
 - **Run from source:** `cd ui && npx tauri dev`. It runs `python server.py` for the engine.
 - **Interface in a browser** (no Tauri): run `STEMBASE_TOKEN=dev python server.py`, note the port it prints, run `npm run dev` in `ui`, and open `http://localhost:1420/?port=<port>&token=dev`. File paths are pasted in place of the file dialog.
 - **Build the installer for this system:** `python build.py` (`--app` reuses the engine already built). Installers land in `ui/src-tauri/target/release/bundle/`. PyInstaller can't cross-compile, so each system builds its own.

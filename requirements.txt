@@ -3,6 +3,7 @@ scipy
 librosa
 soundfile
 torch
+torch-directml; sys_platform == "win32"   # GPU on any DirectX 12 card; installs its own torch 2.4
 demucs
 pedalboard
 pyloudnorm

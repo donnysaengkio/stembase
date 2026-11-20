@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 export type Info = {
   name: string; version: string; output_dir: string; default_output_dir: string; data_dir: string; device: string;
+  processing: string; processing_modes: string[]; gpu: string | null;
   formats: string[]; default_format: string; audio_exts: string[];
   models: string[]; midi_stems: string[]; midi_source: string[]; midi_parts: string[]; snap: string[];
   arrange: string[]; convert_modes: string[]; convert_formats: string[]; sample_rates: string[];
@@ -76,6 +77,9 @@ export const checkDone = (kind: string, params: object) =>
 /** Saves new results in another folder from now on; null goes back to Music/Stembase. Returns the folder in use. */
 export const setOutputFolder = (path: string | null) =>
   call<{ output_dir: string }>("/api/output-folder", { path }).then((r) => r.output_dir);
+/** Automatic, GPU or CPU for stem separation; returns the setting and the processor now in use. */
+export const setProcessing = (mode: string) =>
+  call<{ processing: string; device: string }>("/api/processing", { mode });
 export const openLocation =(path?: string | null) => call("/api/open", { path: path || null }).catch(() => null);
 
 /** The waveform outline of an audio file (peaks between 0 and 1) and its length in seconds. */

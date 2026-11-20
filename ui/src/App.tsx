@@ -43,7 +43,7 @@ function Splash({ error }: { error: string | null }) {
   );
 }
 
-function Main({ info, prefs, setPrefs, setOutput }: { info: Info; prefs: Prefs; setPrefs: (p: Prefs) => void; setOutput: (dir: string) => void }) {
+function Main({ info, prefs, setPrefs, patchInfo }: { info: Info; prefs: Prefs; setPrefs: (p: Prefs) => void; patchInfo: (p: Partial<Info>) => void }) {
   const [tab, setTab] = useState("analyze");
   const [fresh, setFresh] = useState<Record<string, number>>({});   // bumping a tab's number starts it afresh (Reset)
   const checkUpdates = useUpdates(info, prefs);
@@ -74,7 +74,7 @@ function Main({ info, prefs, setPrefs, setOutput }: { info: Info; prefs: Prefs; 
           </section>
         ))}
       </main>
-      <MenuWindows info={info} prefs={{ ...prefs, format }} setPrefs={setPrefs} checkUpdates={checkUpdates} setOutput={setOutput} mark={<Mark size={56} />} />
+      <MenuWindows info={info} prefs={{ ...prefs, format }} setPrefs={setPrefs} checkUpdates={checkUpdates} patchInfo={patchInfo} mark={<Mark size={56} />} />
     </div>
   );
 }
@@ -106,5 +106,5 @@ export default function App() {
 
   if (!info) return <Splash error={error} />;
   return <ModalProvider><Main info={info} prefs={prefs} setPrefs={setPrefs}
-    setOutput={(dir) => setInfo({ ...info, output_dir: dir })} /></ModalProvider>;
+    patchInfo={(p) => setInfo({ ...info, ...p })} /></ModalProvider>;
 }

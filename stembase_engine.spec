@@ -1,9 +1,17 @@
 # PyInstaller recipe for the Stembase audio engine (server.py), the same on Windows, macOS and Linux.
 # Run through build.py, or:  python -m PyInstaller stembase_engine.spec --noconfirm
 # Output: dist/stembase-engine/ (the program plus its libraries and the Demucs models). The Tauri app bundles this folder.
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules, copy_metadata
+from PyInstaller.utils.hooks import collect_all, collect_data_files, collect_submodules, copy_metadata
 
 datas = [("models", "models")]
+binaries = []
+# Windows: torch-directml runs separation on any DirectX 12 graphics card (its DirectML.dll comes with it).
+try:
+    d, b, h = collect_all("torch_directml")
+    datas += d; binaries += b
+    dml_hidden = h + ["torch_directml"]
+except Exception:
+    dml_hidden = []
 for pkg in ("librosa", "demucs", "pyloudnorm", "lazy_loader", "resampy"):
     datas += collect_data_files(pkg)
 # Basic Pitch (audio to MIDI): only its small ONNX model; its TensorFlow / CoreML / TFLite copies are not needed.
@@ -17,12 +25,14 @@ for pkg in ("torch", "librosa", "numpy", "demucs", "safetensors", "tqdm", "regex
 
 hidden = (collect_submodules("demucs") + collect_submodules("engine") + collect_submodules("basic_pitch")
           + collect_submodules("uvicorn")
-          + ["yaml", "safetensors.torch", "pyloudnorm", "onnxruntime", "pretty_midi", "mido", "resampy", "mir_eval"])
+          + ["yaml", "safetensors.torch", "pyloudnorm", "onnxruntime", "pretty_midi", "mido", "resampy", "mir_eval"]
+          + dml_hidden)
 
 a = Analysis(
     ["server.py"],
     pathex=["."],
     datas=datas,
+    binaries=binaries,
     hiddenimports=hidden,
     excludes=["tkinter", "IPython", "notebook", "pytest", "matplotlib", "torch.utils.tensorboard", "tensorboard", "torchvision",
               "tensorflow", "coremltools", "tflite_runtime", "gradio", "gradio_client", "webview"],

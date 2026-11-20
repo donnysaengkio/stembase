@@ -28,9 +28,9 @@ LOAD_ERROR = []
 
 def load_engine():
     try:
-        from engine import analysis, separate, mashup, transform, convert, midi, chords, history, common
+        from engine import analysis, separate, mashup, transform, convert, midi, chords, history, common, gpu
         E.update(analysis=analysis, sep=separate, mashup=mashup, transform=transform, conv=convert, midi=midi,
-                 chords=chords, history=history, common=common)
+                 chords=chords, history=history, common=common, gpu=gpu)
     except Exception:
         traceback.print_exc()
         LOAD_ERROR.append(traceback.format_exc())
@@ -49,7 +49,8 @@ SEP_SPEED = {"htdemucs": 0.3, "htdemucs_ft": 1.2, "htdemucs_6s": 0.4}   # second
 
 def info():
     c, sep, midi, conv = E["common"], E["sep"], E["midi"], E["conv"]
-    return dict(name=APP_NAME, version=APP_VERSION, output_dir=output_root(), default_output_dir=DEFAULT_OUTPUT_DIR, data_dir=DATA_DIR, device=sep.device().upper(),
+    return dict(name=APP_NAME, version=APP_VERSION, output_dir=output_root(), default_output_dir=DEFAULT_OUTPUT_DIR, data_dir=DATA_DIR, device=E["gpu"].label(), processing=E["gpu"].mode(), processing_modes=E["gpu"].MODES,
+                gpu=(E["gpu"].gpu() or (None, None, None))[2],
                 formats=list(c.FORMATS), default_format=c.DEFAULT_FORMAT, audio_exts=list(c.SUPPORTED),
                 models=list(sep.MODELS), midi_stems=list(MIDI_STEMS), midi_source=MIDI_SOURCE, midi_parts=list(midi.PARTS),
                 snap=list(midi.SNAP), arrange=ARRANGE, convert_modes=CONVERT_MODES, convert_formats=list(conv.FORMATS),
@@ -78,7 +79,7 @@ def sep_seconds(path, model):
     if os.path.exists(os.path.join(sep.cache_dir(path, model), "instrumental.wav")): return 0
     d = audio_seconds(path)
     if d is None: return None
-    return 15 + d * SEP_SPEED.get(model, 0.4) / (10 if sep.device() == "cuda" else 1)
+    return 15 + d * SEP_SPEED.get(model, 0.4) / {"cuda": 10, "directml": 1.6}.get(sep.device(), 1)
 
 
 def entry(path):
@@ -144,7 +145,7 @@ def plan_separate(p):
     t = sep_seconds(p["path"], sep.MODELS[label])
     if t == 0: return f"Exporting the stems of **{name(p['path'])}** (already separated with this model, so this is quick)."
     return (f"Separating **{name(p['path'])}** with the {label.split(':')[0]} model: {about(t)} on this "
-            f"{'GPU' if sep.device() == 'cuda' else 'computer'}.")
+            f"{'GPU' if sep.device() != 'cpu' else 'computer'}.")
 
 
 def run_separate(p, progress):
@@ -427,6 +428,16 @@ def peaks(path: str, n: int = 600):
         if len(PEAKS) > 64: PEAKS.clear()
         PEAKS[key] = {"peaks": [round(float(v) / top, 3) for v in p], "duration": round(dur, 3)}
     return PEAKS[key]
+
+
+@app.post("/api/processing")
+async def change_processing(request: Request):
+    """Automatic, GPU or CPU for stem separation; used from the next job on."""
+    try:
+        E["gpu"].set_mode((await request.json()).get("mode"))
+    except ValueError as e:
+        return user_error(e)
+    return {"processing": E["gpu"].mode(), "device": E["gpu"].label()}
 
 
 @app.get("/api/file")

@@ -54,7 +54,9 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          if [ "$RUNNER_OS" != "macOS" ]; then
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pip install torch-directml   # GPU on any DirectX 12 card (AMD, Intel, NVIDIA); brings its own torch 2.4
+          elif [ "$RUNNER_OS" = "Linux" ]; then
             pip install torch --index-url https://download.pytorch.org/whl/cpu   # CPU build: much smaller
           fi
           pip install -r requirements.txt pyinstaller
