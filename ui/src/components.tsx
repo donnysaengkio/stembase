@@ -521,3 +521,42 @@ export function RunRow({ label, onRun, folder, onReset, job }: {
     </div>
   );
 }
+
+/* ---------------- placeholders for the results column ---------------- */
+/** A grey bar standing in for text that a result will fill in. */
+export function Ph({ w = "60%", h = 12 }: { w?: string; h?: number }) {
+  return <span className="ph" style={{ width: w, height: h }} />;
+}
+
+/** The outline of an audio result (title, file line, waveform player) before there is one. */
+export function ShellAudio({ label }: { label: string }) {
+  return (
+    <div className="block result">
+      <div className="result-title">{label}</div>
+      <Ph w="45%" h={10} />
+      <div className="wave">
+        <span className="wave-play shell-play"><IconPlayerPlayFilled size={16} /></span>
+        <span className="shell-wave" />
+        <span className="wave-time">0:00 / 0:00</span>
+      </div>
+    </div>
+  );
+}
+
+/** The outline of a list of saved files. */
+export function ShellFiles({ title, count = 1 }: { title: string; count?: number }) {
+  return (
+    <div className="block">
+      <div className="block-label">{title}</div>
+      {Array.from({ length: count }, (_, i) => (
+        <div className="picked-row" key={i}><IconFileMusic size={18} /><Ph w="55%" /><span className="grow" /><Ph w="48px" h={10} /></div>
+      ))}
+    </div>
+  );
+}
+
+/** The outline of a written report: a few lines of grey bars. */
+export function ShellText({ lines = 3, bare }: { lines?: number; bare?: boolean }) {
+  const widths = ["92%", "78%", "85%", "60%", "70%"];
+  return <div className={(bare ? "" : "block ") + "shell-lines"}>{Array.from({ length: lines }, (_, i) => <Ph key={i} w={widths[i % widths.length]} />)}</div>;
+}

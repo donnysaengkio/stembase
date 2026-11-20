@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Info, FileEntry, fileUrl } from "./api";
 import {
-  AudioResult, Check, Field, FileDrop, FileList, Md, MultiSelect, Radio, RunRow, Section, Select, Slider, useDoneBefore, useJob,
+  AudioResult, Check, Field, FileDrop, FileList, Md, MultiSelect, Ph, Radio, RunRow, Section, Select, ShellAudio, ShellFiles, ShellText,
+  Slider, useDoneBefore, useJob,
 } from "./components";
 
 type TabProps = { info: Info; format: string; reset: () => void };
@@ -19,9 +20,9 @@ function FormatField({ info, value, onChange }: { info: Info; value: string; onC
   return <Field label="Output format"><Select value={value} options={info.formats} onChange={onChange} /></Field>;
 }
 
-/** Nothing in the results column until a job has run. */
-function Empty(_: { text: string }) {
-  return null;
+/** Until a job has run, the results column shows a faded outline of what will appear there. */
+function Shell({ children }: { children: React.ReactNode }) {
+  return <div className="shell" aria-hidden="true">{children}</div>;
 }
 
 /* ---------------- Analyze ---------------- */
@@ -59,7 +60,24 @@ export function AnalyzeTab({ info, reset }: TabProps) {
           folder={r?.folder || info.output_dir} />
       </div>
       <div className="col">
-        {!r ? <Empty text="Drop a track and press Analyze. Key, tempo, loudness and chords appear here." /> : (
+        {!r ? (
+          <Shell>
+            <div className="block card">
+              <div className="tiles">
+                <div className="tile tile-wide"><div className="muted small">Track name</div><div className="tile-value">—</div></div>
+                {["Key", "Tempo", "Loudness", "Length"].map((l) => (
+                  <div className="tile" key={l}><div className="muted small">{l}</div><div className="tile-value">—</div><Ph w="70%" h={10} /></div>
+                ))}
+              </div>
+              <div className="sec">Main chord progression</div>
+              <Ph w="55%" h={20} />
+              <div className="sec">Most used</div>
+              <div className="chips">{["", "", "", ""].map((_, i) => <span className="chip" key={i}><Ph w="34px" h={10} /></span>)}</div>
+            </div>
+            <ShellFiles title="Chords as MIDI" />
+            <div className="block"><div className="block-label">Info</div><ShellText bare lines={4} /></div>
+          </Shell>
+        ) : (
           <>
             <div className="block card">
               <div className="tiles">
@@ -123,7 +141,7 @@ export function SplitTab({ info, format, reset }: TabProps) {
           folder={r?.folder || info.output_dir} />
       </div>
       <div className="col">
-        {!r ? <Empty text="Your stems appear here, ready to play, and are saved in your Music folder." /> : (
+        {!r ? <Shell>{["Vocals", "Drums", "Bass", "Other instruments", "Instrumental (no vocals)"].map((l) => <ShellAudio key={l} label={l} />)}</Shell> : (
           <>
             {r.stems.map((s) => <AudioResult key={s.path} f={s} label={s.label} />)}
             {r.midi.length > 0 && <FileList title="MIDI files" files={r.midi} />}
@@ -164,7 +182,14 @@ export function MidiTab({ info, reset }: TabProps) {
           folder={r?.folder || info.output_dir} />
       </div>
       <div className="col">
-        {!r ? <Empty text="The MIDI file, a preview you can play and a piano roll appear here." /> : (
+        {!r ? (
+          <Shell>
+            <ShellFiles title="MIDI file" />
+            <ShellAudio label="Preview (the MIDI played by a simple synth)" />
+            <div className="block"><div className="block-label">Piano roll</div><div className="shell-roll" /></div>
+            <ShellText />
+          </Shell>
+        ) : (
           <>
             <FileList title="MIDI file" files={[r.midi]} />
             <AudioResult f={r.preview} label="Preview (the MIDI played by a simple synth)" />
@@ -209,7 +234,7 @@ export function MixTab({ info, format, reset }: TabProps) {
           folder={r?.folder || join(info.output_dir, "Mashups")} />
       </div>
       <div className="col">
-        {!r ? <Empty text="Your mashup appears here with a report of how the two songs were matched." /> : (
+        {!r ? <Shell><ShellAudio label="Mashup" /><ShellText lines={4} /></Shell> : (
           <>
             <AudioResult f={r.audio} label="Mashup" />
             <div className="block"><Md text={r.message} /></div>
@@ -246,7 +271,7 @@ export function ShiftTab({ info, format, reset }: TabProps) {
           folder={r?.folder || info.output_dir} />
       </div>
       <div className="col">
-        {!r ? <Empty text="The shifted version appears here." /> : (
+        {!r ? <Shell><ShellAudio label="Result" /><ShellText /></Shell> : (
           <>
             <AudioResult f={r.audio} label="Result" />
             <div className="block"><Md text={r.message} /></div>
@@ -296,7 +321,16 @@ export function EncodeTab({ info, reset }: TabProps) {
           folder={r?.folder || join(info.output_dir, "Converted")} />
       </div>
       <div className="col">
-        {!r ? <Empty text="Converted files appear here with a before-and-after comparison." /> : (
+        {!r ? (
+          <Shell>
+            <ShellFiles title="Converted files" count={2} />
+            <ShellText lines={2} />
+            <div className="block">
+              <div className="block-label">Before and after</div>
+              <ShellText bare lines={3} />
+            </div>
+          </Shell>
+        ) : (
           <>
             {r.files.length > 0 && <FileList title="Converted files" files={r.files} />}
             <div className="block"><Md text={r.message} /></div>

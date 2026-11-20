@@ -226,3 +226,15 @@ details.sub summary:hover { color: var(--text); }
 button.ghost { background: none; border-color: transparent; color: var(--muted); }
 button.ghost:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
 .modal-actions { margin-top: 16px; }
+
+/* Results column before a job has run: the outline of what will appear, faded */
+.shell { opacity: 0.55; pointer-events: none; user-select: none; }
+.ph { display: block; background: var(--border-strong); border-radius: 4px; margin: 4px 0; }
+.picked-row .ph { margin: 0; }
+.shell-lines { display: flex; flex-direction: column; gap: 6px; }
+.shell-play { display: inline-flex; align-items: center; justify-content: center; background: var(--border-strong); border-color: transparent; color: var(--muted); }
+.shell-wave { flex: 1; height: 56px; background: linear-gradient(var(--border-strong), var(--border-strong)) center / 100% 2px no-repeat; }
+.shell .tile-value { color: var(--muted); }
+.shell-roll { height: 150px; border-radius: 6px; background:
+  repeating-linear-gradient(to bottom, var(--panel-2) 0 11px, var(--border) 11px 12px); }
+.shell { display: flex; flex-direction: column; gap: 12px; }

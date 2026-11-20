@@ -2,8 +2,9 @@
 
 A desktop app for Windows, macOS and Linux that analyzes music, splits songs into stems, turns audio into MIDI, makes
 mashups, changes key or tempo and converts audio files. Everything runs on your computer: nothing is uploaded, and no
-internet connection is needed (the separation models are included). Stembase 2 is a rebuild of Stem Studio with a
-Tauri app around the same audio engine.
+internet connection is needed (the separation models are included).
+
+![Stembase analyzing a track: key, tempo, loudness, length and the main chord progression](docs/screenshots/analyze.png)
 
 ## Install
 | System | Installer | Notes |
@@ -24,14 +25,19 @@ Uninstalling keeps your results.
 | **Shift** | Shift by semitones and/or set a target BPM (the current tempo is detected for you). |
 | **Encode** | Convert any number of files between WAV, AIFF, FLAC, MP3, Opus and Ogg Vorbis, or fit each file into a size in MB. |
 
+| Split: five stems, each with its own player | MIDI before a job: the right side shows what will appear |
+|---|---|
+| ![Split tab with vocals, drums, bass, other instruments and instrumental stems](docs/screenshots/split.png) | ![MIDI tab with the outline of its results](docs/screenshots/midi.png) |
+
 Drop files anywhere on a tab's drop zone, or click it to choose. Every job shows its progress in a window, then
 confirms where it saved the result. If you load a file that was already processed, Stembase says so and offers the folder.
 
 **Output format**: Split, Mix and Shift each have their own, starting from the default set in Preferences: WAV 32-bit
 float / 24-bit / 16-bit, FLAC 24 / 16-bit, or MP3 320 / 192 / 128 kbps. Encode has its own list of formats. Supported
-input: WAV, MP3, FLAC, OGG, Opus, AIFF. **Open Folder** next to each tab's run button opens where that tab saves.
+input: WAV, MP3, FLAC, OGG, Opus, AIFF. Under each tab: **Start**, **Cancel** (stops the running job), **Open Folder**
+(where that tab saves) and **Reset** (clears the tab).
 
-## Menu (☰)
+## Settings menu (⚙)
 | Item | Shortcut (⌘ on a Mac) | |
 |---|---|---|
 | Check For Updates | Ctrl+U | Downloads, installs and reopens a newer Stembase, signed by its maker |
